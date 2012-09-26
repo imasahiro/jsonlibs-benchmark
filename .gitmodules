@@ -1,6 +1,3 @@
-[submodule "json-c"]
-	path = json-c
-	url = https://github.com/jehiah/json-c.git
 [submodule "jansson"]
 	path = jansson
 	url = git://github.com/akheron/jansson.git
