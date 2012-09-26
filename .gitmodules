@@ -1,0 +1,18 @@
+[submodule "json-c"]
+	path = json-c
+	url = https://github.com/jehiah/json-c.git
+[submodule "yajl"]
+	path = yajl
+	url = git://github.com/lloyd/yajl
+[submodule "jansson"]
+	path = jansson
+	url = git://github.com/akheron/jansson.git
+[submodule "JSONKit"]
+	path = JSONKit
+	url = https://github.com/johnezang/JSONKit.git
+[submodule "TouchJSON"]
+	path = TouchJSON
+	url = git://github.com/TouchCode/TouchJSON.git
+[submodule "kjson"]
+	path = kjson
+	url = git@github.com:imasahiro/kjson.git
