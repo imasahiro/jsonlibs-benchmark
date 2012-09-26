@@ -113,7 +113,9 @@ typedef int64_t JSLONG;
 #endif
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifndef __LITTLE_ENDIAN__
 #define __LITTLE_ENDIAN__
+#endif
 #else
 
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__

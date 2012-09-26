@@ -60,7 +60,7 @@ double createDouble(double intNeg, double intValue, double frcValue, int frcDeci
     return (intValue + (frcValue / g_pow10[frcDecimalCount])) * intNeg;
 }
 
-static JSOBJ SetError( struct DecoderState *ds, int offset, const char *message)
+static JSOBJ Dec_SetError( struct DecoderState *ds, int offset, const char *message)
 {
     ds->dec->errorOffset = ds->start + offset;
     ds->dec->errorStr = (char *) message;
@@ -127,7 +127,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_numeric ( struct DecoderState *ds)
 
 			if (intValue > overflowLimit)
 			{
-				return SetError(ds, -1, overflowLimit == LLONG_MAX ? "Value is too big" : "Value is too small");
+				return Dec_SetError(ds, -1, overflowLimit == LLONG_MAX ? "Value is too big" : "Value is too small");
 			}
 #endif
 
@@ -311,7 +311,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_true ( struct DecoderState *ds)
     RETURN_JSOBJ_NULLCHECK(ds->dec->newTrue());
 
 SETERROR:
-    return SetError(ds, -1, "Unexpected character found when decoding 'true'");
+    return Dec_SetError(ds, -1, "Unexpected character found when decoding 'true'");
 }
 
 FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_false ( struct DecoderState *ds) 
@@ -333,7 +333,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_false ( struct DecoderState *ds)
     RETURN_JSOBJ_NULLCHECK(ds->dec->newFalse());
 
 SETERROR:
-    return SetError(ds, -1, "Unexpected character found when decoding 'false'");
+    return Dec_SetError(ds, -1, "Unexpected character found when decoding 'false'");
 
 }
 
@@ -355,7 +355,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_null ( struct DecoderState *ds)
     RETURN_JSOBJ_NULLCHECK(ds->dec->newNull());
 
 SETERROR:
-    return SetError(ds, -1, "Unexpected character found when decoding 'null'");
+    return Dec_SetError(ds, -1, "Unexpected character found when decoding 'null'");
 }
 
 FASTCALL_ATTR void FASTCALL_MSVC SkipWhitespace(struct DecoderState *ds) 
@@ -433,7 +433,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_string ( struct DecoderState *ds)
             ds->escStart = (wchar_t *) ds->dec->realloc (ds->escStart, newSize * sizeof(wchar_t));
             if (!ds->escStart)
             {
-                return SetError(ds, -1, "Could not reserve memory block");
+                return Dec_SetError(ds, -1, "Could not reserve memory block");
             }
         }
         else
@@ -443,7 +443,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_string ( struct DecoderState *ds)
             ds->escStart = (wchar_t *) ds->dec->malloc (newSize * sizeof(wchar_t));
             if (!ds->escStart)
             {
-                return SetError(ds, -1, "Could not reserve memory block");
+                return Dec_SetError(ds, -1, "Could not reserve memory block");
             }
             memcpy (ds->escStart, oldStart, escLen * sizeof(wchar_t));
         }
@@ -459,7 +459,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_string ( struct DecoderState *ds)
         switch (g_decoderLookup[(JSUINT8)(*inputOffset)])
         {
         case DS_ISNULL:
-            return SetError(ds, -1, "Unmatched ''\"' when when decoding 'string'");
+            return Dec_SetError(ds, -1, "Unmatched ''\"' when when decoding 'string'");
 
         case DS_ISQUOTE:
             ds->lastType = JT_UTF8;
@@ -468,7 +468,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_string ( struct DecoderState *ds)
             RETURN_JSOBJ_NULLCHECK(ds->dec->newString(ds->escStart, escOffset));
 
         case DS_UTFLENERROR:
-            return SetError (ds, -1, "Invalid UTF-8 sequence length when decoding 'string'");
+            return Dec_SetError(ds, -1, "Invalid UTF-8 sequence length when decoding 'string'");
 
         case DS_ISESCAPE:
             inputOffset ++;
@@ -492,8 +492,8 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_string ( struct DecoderState *ds)
                     {
                         switch (*inputOffset)
                         {
-                        case '\0':  return SetError (ds, -1, "Unterminated unicode escape sequence when decoding 'string'");
-                        default:        return SetError (ds, -1, "Unexpected character in unicode escape sequence when decoding 'string'");
+                        case '\0':  return Dec_SetError(ds, -1, "Unterminated unicode escape sequence when decoding 'string'");
+                        default:        return Dec_SetError(ds, -1, "Unexpected character in unicode escape sequence when decoding 'string'");
 
                         case '0':
                         case '1':
@@ -547,7 +547,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_string ( struct DecoderState *ds)
                         // Decode pair
                         if ((sur[1] & 0xfc00) != 0xdc00)
                         {
-                            return SetError (ds, -1, "Unpaired high surrogate when decoding 'string'");
+                            return Dec_SetError(ds, -1, "Unpaired high surrogate when decoding 'string'");
                         }
 
 #if WCHAR_MAX == 0xffff
@@ -561,8 +561,8 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_string ( struct DecoderState *ds)
                     break;
                 }
 
-            case '\0': return SetError(ds, -1, "Unterminated escape sequence when decoding 'string'");
-            default: return SetError(ds, -1, "Unrecognized escape sequence when decoding 'string'");
+            case '\0': return Dec_SetError(ds, -1, "Unterminated escape sequence when decoding 'string'");
+            default: return Dec_SetError(ds, -1, "Unrecognized escape sequence when decoding 'string'");
             }
             break;
 
@@ -576,10 +576,10 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_string ( struct DecoderState *ds)
             ucs <<= 6;
             if (((*inputOffset) & 0x80) != 0x80)
             {
-                return SetError(ds, -1, "Invalid octet in UTF-8 sequence when decoding 'string'");
+                return Dec_SetError(ds, -1, "Invalid octet in UTF-8 sequence when decoding 'string'");
             }
             ucs |= (*inputOffset++) & 0x3f;
-            if (ucs < 0x80) return SetError (ds, -1, "Overlong 2 byte UTF-8 sequence detected when decoding 'string'");
+            if (ucs < 0x80) return Dec_SetError(ds, -1, "Overlong 2 byte UTF-8 sequence detected when decoding 'string'");
             *(escOffset++) = (wchar_t) ucs;
             break;
         }
@@ -596,13 +596,13 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_string ( struct DecoderState *ds)
 
                 if ((oct & 0x80) != 0x80)
                 {
-                    return SetError(ds, -1, "Invalid octet in UTF-8 sequence when decoding 'string'");
+                    return Dec_SetError(ds, -1, "Invalid octet in UTF-8 sequence when decoding 'string'");
                 }
 
                 ucs |= oct & 0x3f;
             }
 
-            if (ucs < 0x800) return SetError (ds, -1, "Overlong 3 byte UTF-8 sequence detected when encoding string");
+            if (ucs < 0x800) return Dec_SetError(ds, -1, "Overlong 3 byte UTF-8 sequence detected when encoding string");
             *(escOffset++) = (wchar_t) ucs;
             break;
         }
@@ -619,13 +619,13 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_string ( struct DecoderState *ds)
 
                 if ((oct & 0x80) != 0x80)
                 {
-                    return SetError(ds, -1, "Invalid octet in UTF-8 sequence when decoding 'string'");
+                    return Dec_SetError(ds, -1, "Invalid octet in UTF-8 sequence when decoding 'string'");
                 }
 
                 ucs |= oct & 0x3f;
             }
 
-            if (ucs < 0x10000) return SetError (ds, -1, "Overlong 4 byte UTF-8 sequence detected when decoding 'string'");
+            if (ucs < 0x10000) return Dec_SetError(ds, -1, "Overlong 4 byte UTF-8 sequence detected when decoding 'string'");
 
             #if WCHAR_MAX == 0xffff
             if (ucs >= 0x10000)
@@ -671,7 +671,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_array( struct DecoderState *ds)
                     if (len > 0)
                     {
                         ds->dec->releaseObject(newObj);
-                        return SetError(ds, -1, "Unexpected trailing comma in array");
+                        return Dec_SetError(ds, -1, "Unexpected trailing comma in array");
                     }
                     // We end up here when decoding empty lists "[]"
                     ClearError(ds);
@@ -679,7 +679,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_array( struct DecoderState *ds)
 
                 default:
                     ds->dec->releaseObject(newObj);
-                    return SetError(ds, -1, "Unexpected character in found when decoding array value");
+                    return Dec_SetError(ds, -1, "Unexpected character in found when decoding array value");
             }
         
         
@@ -701,14 +701,14 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_array( struct DecoderState *ds)
 
             default:
                 ds->dec->releaseObject(newObj);
-                return SetError(ds, -1, "Unexpected character in found when decoding array value");
+                return Dec_SetError(ds, -1, "Unexpected character in found when decoding array value");
         }
         
         len ++;
     }
 
     ds->dec->releaseObject(newObj);
-    return SetError(ds, -1, "Unmatched ']' when decoding 'array'");
+    return Dec_SetError(ds, -1, "Unmatched ']' when decoding 'array'");
 }
 
 
@@ -744,7 +744,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_object( struct DecoderState *ds)
         {
             ds->dec->releaseObject(newObj);
             ds->dec->releaseObject(itemName);
-            return SetError(ds, -1, "Key name of object must be 'string' when decoding 'object'");
+            return Dec_SetError(ds, -1, "Key name of object must be 'string' when decoding 'object'");
         }
 
         SkipWhitespace(ds);
@@ -753,7 +753,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_object( struct DecoderState *ds)
         {
             ds->dec->releaseObject(newObj);
             ds->dec->releaseObject(itemName);
-            return SetError(ds, -1, "No ':' found when decoding object value");
+            return Dec_SetError(ds, -1, "No ':' found when decoding object value");
         }
 
         SkipWhitespace(ds);
@@ -781,12 +781,12 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_object( struct DecoderState *ds)
 
             default:
                 ds->dec->releaseObject(newObj);
-                return SetError(ds, -1, "Unexpected character in found when decoding object value");
+                return Dec_SetError(ds, -1, "Unexpected character in found when decoding object value");
         }
     }
 
     ds->dec->releaseObject(newObj);
-    return SetError(ds, -1, "Unmatched '}' when decoding object");
+    return Dec_SetError(ds, -1, "Unmatched '}' when decoding object");
 }
 
 FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_any(struct DecoderState *ds)
@@ -825,7 +825,7 @@ FASTCALL_ATTR JSOBJ FASTCALL_MSVC decode_any(struct DecoderState *ds)
                 break;
                 
             default:
-                return SetError(ds, -1, "Expected object or value");
+                return Dec_SetError(ds, -1, "Expected object or value");
         }
     }
 }
@@ -862,7 +862,7 @@ JSOBJ JSON_DecodeObject(JSONObjectDecoder *dec, const char *buffer, size_t cbBuf
     if (ds.start != ds.end && ret)
     {
         dec->releaseObject(ret);    
-        return SetError(&ds, -1, "Trailing data");
+        return Dec_SetError(&ds, -1, "Trailing data");
     }
 
     return ret;

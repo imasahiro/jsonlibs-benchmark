@@ -79,7 +79,7 @@ static const JSUINT8 g_asciiOutputTable[256] =
 };
 
 
-static void SetError (JSOBJ obj, JSONObjectEncoder *enc, const char *message)
+static void Enc_SetError (JSOBJ obj, JSONObjectEncoder *enc, const char *message)
 {
     enc->errorMsg = message;
     enc->errorObj = obj;
@@ -104,7 +104,7 @@ void Buffer_Realloc (JSONObjectEncoder *enc, size_t cbNeeded)
         enc->start = (char *) enc->realloc (enc->start, newSize);
         if (!enc->start)
         {
-            SetError (NULL, enc, "Could not reserve memory block");
+            Enc_SetError(NULL, enc, "Could not reserve memory block");
             return;
         }
     }
@@ -115,7 +115,7 @@ void Buffer_Realloc (JSONObjectEncoder *enc, size_t cbNeeded)
         enc->start = (char *) enc->malloc (newSize);
         if (!enc->start)
         {
-            SetError (NULL, enc, "Could not reserve memory block");
+            Enc_SetError(NULL, enc, "Could not reserve memory block");
             return;
         }
         memcpy (enc->start, oldStart, offset);
@@ -265,7 +265,7 @@ int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, const char 
                 if (end - io < 1)
                 {
                     enc->offset += (of - enc->offset);
-                    SetError (obj, enc, "Unterminated UTF-8 sequence when encoding string");
+                    Enc_SetError(obj, enc, "Unterminated UTF-8 sequence when encoding string");
                     return FALSE;
                 }
 
@@ -281,7 +281,7 @@ int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, const char 
                 if (ucs < 0x80)
                 {
                     enc->offset += (of - enc->offset);
-                    SetError (obj, enc, "Overlong 2 byte UTF-8 sequence detected when encoding string");
+                    Enc_SetError(obj, enc, "Overlong 2 byte UTF-8 sequence detected when encoding string");
                     return FALSE;
                 }
 
@@ -298,7 +298,7 @@ int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, const char 
                 if (end - io < 2)
                 {
                     enc->offset += (of - enc->offset);
-                    SetError (obj, enc, "Unterminated UTF-8 sequence when encoding string");
+                    Enc_SetError(obj, enc, "Unterminated UTF-8 sequence when encoding string");
                     return FALSE;
                 }
 
@@ -318,7 +318,7 @@ int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, const char 
                 if (ucs < 0x800)
                 {
                     enc->offset += (of - enc->offset);
-                    SetError (obj, enc, "Overlong 3 byte UTF-8 sequence detected when encoding string");
+                    Enc_SetError(obj, enc, "Overlong 3 byte UTF-8 sequence detected when encoding string");
                     return FALSE;
                 }
 
@@ -332,7 +332,7 @@ int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, const char 
                 if (end - io < 3)
                 {
                     enc->offset += (of - enc->offset);
-                    SetError (obj, enc, "Unterminated UTF-8 sequence when encoding string");
+                    Enc_SetError(obj, enc, "Unterminated UTF-8 sequence when encoding string");
                     return FALSE;
                 }
 
@@ -345,7 +345,7 @@ int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, const char 
                 if (ucs < 0x10000)
                 {
                     enc->offset += (of - enc->offset);
-                    SetError (obj, enc, "Overlong 4 byte UTF-8 sequence detected when encoding string");
+                    Enc_SetError(obj, enc, "Overlong 4 byte UTF-8 sequence detected when encoding string");
                     return FALSE;
                 }
 
@@ -357,7 +357,7 @@ int Buffer_EscapeStringValidated (JSOBJ obj, JSONObjectEncoder *enc, const char 
             case 5:
             case 6:
                 enc->offset += (of - enc->offset);
-                SetError (obj, enc, "Unsupported UTF-8 sequence length when encoding string");
+                Enc_SetError(obj, enc, "Unsupported UTF-8 sequence length when encoding string");
                 return FALSE;
 
             case 30:
@@ -477,12 +477,12 @@ int Buffer_AppendDoubleUnchecked(JSOBJ obj, JSONObjectEncoder *enc, double value
 
     if (value == HUGE_VAL || value == -HUGE_VAL)
     {
-        SetError (obj, enc, "Invalid Inf value when encoding double");
+        Enc_SetError(obj, enc, "Invalid Inf value when encoding double");
         return FALSE;
     }
     if (! (value == value)) 
     {
-        SetError (obj, enc, "Invalid Nan value when encoding double");
+        Enc_SetError(obj, enc, "Invalid Nan value when encoding double");
         return FALSE;
     }
 
@@ -625,7 +625,7 @@ void encode(JSOBJ obj, JSONObjectEncoder *enc, const char *name, size_t cbName)
 
     if (enc->level > enc->recursionMax)
     {
-        SetError (obj, enc, "Maximum recursion level reached");
+        Enc_SetError(obj, enc, "Maximum recursion level reached");
         return;
     }
 
@@ -859,7 +859,7 @@ char *JSON_EncodeObject(JSOBJ obj, JSONObjectEncoder *enc, char *_buffer, size_t
         enc->start = (char *) enc->malloc (_cbBuffer);
         if (!enc->start)
         {
-            SetError(obj, enc, "Could not reserve memory block");
+            Enc_SetError(obj, enc, "Could not reserve memory block");
             return NULL;
         }
         enc->heap = 1;
