@@ -34,7 +34,7 @@ if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
 endif()
 
 add_executable(bench bench.c kjson.c rapidjson.cc cJSON.c yajl_bench.c
-        jansson.c json-c.c ultrajson.c pficommon.cc jsoncpp.cc)
+        jansson.c json-c.c ultrajson.c pficommon.cc jsoncpp.cc picojson.cc)
 
 MESSAGE(STATUS)
 MESSAGE(STATUS "---------------------------------------------------------------------------" )

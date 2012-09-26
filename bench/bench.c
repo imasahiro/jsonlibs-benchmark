@@ -17,7 +17,7 @@ static void show_timer(const char *s)
     gettimeofday(&endtime, NULL);
     double sec = (endtime.tv_sec - g_timer.tv_sec)
         + (double)(endtime.tv_usec - g_timer.tv_usec) / 1000 / 1000;
-    printf("%20s: %f sec\n", s, sec);
+    printf("%s, %f, ", s, sec);
     reset_timer();
 }
 
@@ -44,6 +44,39 @@ static char *loadFile(const char *file, size_t *length)
     return json;
 }
 
+static void *nop_bench_context_new()
+{
+    return 0;
+}
+
+static void nop_bench_context_delete(void *context)
+{
+}
+
+static int nop_bench_get(void *context, my_json_object_t root, const char *key, size_t keyLength)
+{
+    return 0;
+}
+
+static void nop_bench_set(void *context, my_json_object_t root, const char *key, size_t keyLength)
+{
+}
+
+static my_json_object_t nop_bench_parse(void *context, const char *text, size_t length)
+{
+    return 0;
+}
+
+static void nop_bench_tostr(void *context, my_json_object_t root)
+{
+}
+
+static void nop_bench_destruct(void *context, my_json_object_t root)
+{
+}
+
+DEFINE_BENCHMARK(nop);
+
 int iteration = 16;
 #define PARSER_ITR  64
 #define GETTER_SETTER_ITR (1024*128)
@@ -60,7 +93,7 @@ void benchmark(struct benchmark *bench)
     text = "[{\"a\" : 1000}]";
     length = strlen(text);
 #endif
-    printf("%s\n", bench->NAME);
+    printf("\n%s, ", bench->NAME);
     bench->context = bench->fn_context_new();
     root = bench->fn_parse(bench->context, text, length);
 
@@ -111,16 +144,19 @@ int main(int argc, char* argv[])
     benchmark(&benchmark_##NAME);\
 } while (0)
     int i;
-    for (i = 0; i < 1; i++) {
+    for (i = 0; i < 2; i++) {
+        RUN(nop);
         RUN(kjson);
         RUN(rapidjson);
         //RUN(cJSON);
-        //RUN(yajl);
+        RUN(yajl);
         RUN(jansson);
         RUN(json_c);
         RUN(jsoncpp);
+        RUN(picojson);
         RUN(ultrajson);
         RUN(pficommon);
+        printf("\n");
     }
 #undef RUN
     return 0;
