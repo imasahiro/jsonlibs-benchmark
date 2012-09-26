@@ -7,6 +7,9 @@ project(kjson)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/json-c/
         ${CMAKE_CURRENT_SOURCE_DIR}/../json-c/
+        ${CMAKE_CURRENT_SOURCE_DIR}/../jsoncpp/
+        ${CMAKE_CURRENT_SOURCE_DIR}/../jsoncpp/src/lib_json
+        ${CMAKE_CURRENT_SOURCE_DIR}/../jsoncpp/include
         ${CMAKE_CURRENT_SOURCE_DIR}/../yajl/src/
         ${CMAKE_CURRENT_SOURCE_DIR}/../yajl/src/api
         ${CMAKE_CURRENT_SOURCE_DIR}/../pficommon/
@@ -31,7 +34,7 @@ if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
 endif()
 
 add_executable(bench bench.c kjson.c rapidjson.cc cJSON.c yajl_bench.c
-        jansson.c json-c.c ultrajson.c pficommon.cc)
+        jansson.c json-c.c ultrajson.c pficommon.cc jsoncpp.cc)
 
 MESSAGE(STATUS)
 MESSAGE(STATUS "---------------------------------------------------------------------------" )

@@ -118,6 +118,7 @@ int main(int argc, char* argv[])
         //RUN(yajl);
         RUN(jansson);
         RUN(json_c);
+        RUN(jsoncpp);
         RUN(ultrajson);
         RUN(pficommon);
     }
