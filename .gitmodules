@@ -3,7 +3,7 @@
 	url = git://github.com/akheron/jansson.git
 [submodule "kjson"]
 	path = kjson
-	url = git@github.com:imasahiro/kjson.git
+	url = git://github.com/imasahiro/kjson.git
 [submodule "pficommon"]
 	path = pficommon
 	url = git://github.com/pfi/pficommon.git

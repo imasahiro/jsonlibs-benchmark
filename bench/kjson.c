@@ -19,7 +19,7 @@ static int kjson_bench_get(void *context, my_json_object_t root, const char *key
 {
     JSON json = (JSON) root;
     JSON ary = JSONArray_get(json, 0);
-    JSON val = JSON_get(ary, key);
+    JSON val = JSON_get(ary, key, keyLength);
     return val.bits != 0;
 }
 
