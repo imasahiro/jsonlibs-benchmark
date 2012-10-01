@@ -3,11 +3,16 @@
 
 static void *kjson_bench_context_new()
 {
-    return NULL;
+    JSONMemoryPool *jm = (JSONMemoryPool *) malloc(sizeof(*jm));
+    JSONMemoryPool_Init(jm);
+    return (void *) jm;
 }
 
 static void  kjson_bench_context_delete(void *context)
 {
+    JSONMemoryPool *jm = (JSONMemoryPool *) context;
+    JSONMemoryPool_Delete(jm);
+    free(jm);
 }
 
 static int kjson_bench_get(void *context, my_json_object_t root, const char *key, size_t keyLength)
@@ -20,14 +25,16 @@ static int kjson_bench_get(void *context, my_json_object_t root, const char *key
 
 static void kjson_bench_set(void *context, my_json_object_t root, const char *key, size_t keyLength)
 {
+    JSONMemoryPool *jm = (JSONMemoryPool *) context;
     JSON json = (JSON) root;
     JSON ary = JSONArray_get(json, 0);
-    JSONObject_set(ary, JSONString_new(key, keyLength), JSONInt_new(1));
+    JSONObject_set(jm, ary, JSONString_new(jm, key, keyLength), JSONNull_new());
 }
 
 static my_json_object_t kjson_bench_parse(void *context, const char *text, size_t length)
 {
-    JSON json = parseJSON(text, text + length);
+    JSONMemoryPool *jm = (JSONMemoryPool *) context;
+    JSON json = parseJSON(jm, text, text + length);
     return (my_json_object_t) json.bits;
 }
 
