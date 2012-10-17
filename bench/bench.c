@@ -144,18 +144,24 @@ int main(int argc, char* argv[])
     benchmark(&benchmark_##NAME);\
 } while (0)
     int i;
-    for (i = 0; i < 2; i++) {
-        RUN(nop);
+#define N 32
+    for (i = 0; i < N; i++) {
+#define BENCH_ALL
+#ifndef BENCH_ALL
         RUN(kjson);
+#else
+        //RUN(nop);
+        //RUN(kjson);
         RUN(rapidjson);
         //RUN(cJSON);
-        RUN(yajl);
-        RUN(jansson);
-        RUN(json_c);
-        RUN(jsoncpp);
-        RUN(picojson);
-        RUN(ultrajson);
-        RUN(pficommon);
+        //RUN(yajl);
+        //RUN(jansson);
+        //RUN(json_c);
+        //RUN(jsoncpp);
+        //RUN(picojson);
+        //RUN(ultrajson);
+        //RUN(pficommon);
+#endif
         printf("\n");
     }
 #undef RUN
