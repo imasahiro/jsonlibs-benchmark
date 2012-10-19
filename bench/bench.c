@@ -5,6 +5,11 @@
 #include <assert.h>
 #include "bench.h"
 
+#define USE_BENCH_PARSE 1
+//#define USE_BENCH_TOSTR 1
+//#define USE_BENCH_GET0  1
+//#define USE_BENCH_GET1  1
+//#define USE_BENCH_SET   1
 static struct timeval g_timer;
 static void reset_timer()
 {
@@ -97,6 +102,7 @@ void benchmark(struct benchmark *bench)
     bench->context = bench->fn_context_new();
     root = bench->fn_parse(bench->context, text, length);
 
+#ifdef USE_BENCH_PARSE
     reset_timer();
     for (i = 0; i < iteration; i++) {
         for (j = 0; j < PARSER_ITR; j++) {
@@ -104,34 +110,43 @@ void benchmark(struct benchmark *bench)
         }
     }
     show_timer("JSON.parse");
+#endif
 
+#ifdef USE_BENCH_TOSTR
     for (i = 0; i < iteration; i++) {
         for (j = 0; j < PARSER_ITR; j++) {
             bench->fn_tostr(bench->context, objects[PARSER_ITR*i+j]);
         }
     }
     show_timer("JSON.toString");
+#endif
 
+#ifdef USE_BENCH_GET0
     const char *key0 = "in_reply_to_status_id";
     size_t len0 = strlen("in_reply_to_status_id");
     for (i = 0; i < iteration*GETTER_SETTER_ITR; i++) {
         bench->fn_get(bench->context, root, key0, len0);
     }
     show_timer("JSON.get[Found]");
+#endif
 
+#ifdef USE_BENCH_GET1
     const char *key1 = "_______NOT_FOUND_______";
     size_t len1 = strlen("_______NOT_FOUND_______");
     for (i = 0; i < iteration*GETTER_SETTER_ITR; i++) {
         bench->fn_get(bench->context, root, key1, len1);
     }
     show_timer("JSON.get[NotFound]");
+#endif
 
+#ifdef USE_BENCH_SET
     const char *key2 = "_______NEW KEY_______";
     size_t len2 = strlen("_______NEW KEY_______");
     for (i = 0; i < iteration*GETTER_SETTER_ITR; i++) {
         bench->fn_set(bench->context, root, key2, len2);
     }
     show_timer("JSON.set");
+#endif
 
     bench->fn_tostr(bench->context, root);
     bench->fn_context_delete(bench->context);
