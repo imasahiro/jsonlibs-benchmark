@@ -6,10 +6,10 @@
 #include "bench.h"
 
 #define USE_BENCH_PARSE 1
-//#define USE_BENCH_TOSTR 1
-//#define USE_BENCH_GET0  1
-//#define USE_BENCH_GET1  1
-//#define USE_BENCH_SET   1
+#define USE_BENCH_TOSTR 1
+#define USE_BENCH_GET0  1
+#define USE_BENCH_GET1  1
+#define USE_BENCH_SET   1
 static struct timeval g_timer;
 static void reset_timer()
 {
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
         RUN(kjson);
 #else
         //RUN(nop);
-        //RUN(kjson);
+        RUN(kjson);
         RUN(rapidjson);
         //RUN(cJSON);
         //RUN(yajl);
