@@ -40,10 +40,7 @@ static void rapidjson_bench_set(void *context, my_json_object_t root, const char
 static my_json_object_t rapidjson_bench_parse(void *context, const char *text, size_t length)
 {
     Document *doc = new Document();
-    char buf[length+1];
-    memcpy(buf, text, length);
-    buf[length] = 0;
-    doc->ParseInsitu<0>(buf);
+    doc->Parse(text);
     return (my_json_object_t) doc;
 }
 

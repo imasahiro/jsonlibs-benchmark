@@ -1,4 +1,4 @@
-#include "../kjson/kjson.c"
+#include "../kjson/kjson/kjson.c"
 #include "bench.h"
 
 static void *kjson_bench_context_new()
@@ -25,16 +25,20 @@ static int kjson_bench_get(void *context, my_json_object_t root, const char *key
 
 static void kjson_bench_set(void *context, my_json_object_t root, const char *key, size_t keyLength)
 {
-    JSONMemoryPool *jm = (JSONMemoryPool *) context;
-    JSON json = (JSON) root;
-    JSON ary = JSONArray_get(json, 0);
-    JSONObject_set(jm, ary, JSONString_new(jm, key, keyLength), JSONNull_new());
+    //JSONMemoryPool *jm = (JSONMemoryPool *) context;
+    //JSON json = (JSON) root;
+    //JSON ary = JSONArray_get(json, 0);
+    //JSONObject_set(jm, ary, JSONString_new(jm, key, keyLength), JSONNull_new());
 }
 
 static my_json_object_t kjson_bench_parse(void *context, const char *text, size_t length)
 {
     JSONMemoryPool *jm = (JSONMemoryPool *) context;
     JSON json = parseJSON(jm, text, text + length);
+    //fprintf(stderr, "%d, len=%d\n", JSON_type(json), JSON_length(json));
+    //if (JSON_type(json) == JSON_Error) {
+    //    fprintf(stderr, "%s\n", JSONError_get(json));
+    //}
     return (my_json_object_t) json.bits;
 }
 

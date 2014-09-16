@@ -6,10 +6,10 @@
 #include "bench.h"
 
 #define USE_BENCH_PARSE 1
-#define USE_BENCH_TOSTR 1
-#define USE_BENCH_GET0  1
-#define USE_BENCH_GET1  1
-#define USE_BENCH_SET   1
+//#define USE_BENCH_TOSTR 1
+//#define USE_BENCH_GET0  1
+//#define USE_BENCH_GET1  1
+//#define USE_BENCH_SET   1
 static struct timeval g_timer;
 static void reset_timer()
 {
@@ -28,6 +28,7 @@ static void show_timer(const char *s)
 
 static char *loadFile(const char *file, size_t *length)
 {
+    static size_t len = 0;
     char pathbuf[1024];
     snprintf(pathbuf, 1024, "%s", file);
     FILE *fp = fopen(pathbuf, "rb");
@@ -36,10 +37,12 @@ static char *loadFile(const char *file, size_t *length)
         fp = fopen(pathbuf, "rb");
     }
     assert(fp != 0);
-    fseek(fp, 0, SEEK_END);
-    size_t len = (size_t)ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    char *json = (char*)calloc(1, len + 1);
+    if (len == 0) {
+        fseek(fp, 0, SEEK_END);
+        len = (size_t)ftell(fp);
+        fseek(fp, 0, SEEK_SET);
+    }
+    char *json = (char*)malloc(len + 1);
     if (len != fread(json, 1, len, fp)) {
         exit(EXIT_FAILURE);
     }
@@ -82,9 +85,12 @@ static void nop_bench_destruct(void *context, my_json_object_t root)
 
 DEFINE_BENCHMARK(nop);
 
-int iteration = 16;
-#define PARSER_ITR  64
+int iteration = 2;
+#define PARSER_ITR  1
 #define GETTER_SETTER_ITR (1024*128)
+//#define FILE_NAME "twitter_public.json"
+//#define  FILE_NAME  "../twitter3.json"
+#define  FILE_NAME  "../kjson/test/benchmark4.json"
 void benchmark(struct benchmark *bench)
 {
     int i, j;
@@ -93,20 +99,22 @@ void benchmark(struct benchmark *bench)
     size_t length;
     const char *text;
 #if 1
-    text = loadFile("twitter_public.json", &length);
+    text = loadFile(FILE_NAME, &length);
 #else
     text = "[{\"a\" : 1000}]";
     length = strlen(text);
 #endif
     printf("\n%s, ", bench->NAME);
     bench->context = bench->fn_context_new();
-    root = bench->fn_parse(bench->context, text, length);
+    //root = bench->fn_parse(bench->context, text, length);
 
 #ifdef USE_BENCH_PARSE
     reset_timer();
     for (i = 0; i < iteration; i++) {
         for (j = 0; j < PARSER_ITR; j++) {
-            objects[PARSER_ITR*i+j] = bench->fn_parse(bench->context, text, length);
+            char *x = loadFile(FILE_NAME, &length);
+            objects[PARSER_ITR*i+j] = bench->fn_parse(bench->context, x, length);
+            free(x);
         }
     }
     show_timer("JSON.parse");
@@ -150,6 +158,7 @@ void benchmark(struct benchmark *bench)
 
     bench->fn_tostr(bench->context, root);
     bench->fn_context_delete(bench->context);
+    free((void *) text);
 }
 
 int main(int argc, char* argv[])
@@ -159,22 +168,22 @@ int main(int argc, char* argv[])
     benchmark(&benchmark_##NAME);\
 } while (0)
     int i;
-#define N 32
+#define N 4
     for (i = 0; i < N; i++) {
 #define BENCH_ALL
 #ifndef BENCH_ALL
         RUN(kjson);
 #else
-        //RUN(nop);
+        RUN(nop);
         RUN(kjson);
         RUN(rapidjson);
         //RUN(cJSON);
-        //RUN(yajl);
+        RUN(yajl);
         //RUN(jansson);
         //RUN(json_c);
         //RUN(jsoncpp);
         //RUN(picojson);
-        //RUN(ultrajson);
+        RUN(ultrajson);
         //RUN(pficommon);
 #endif
         printf("\n");

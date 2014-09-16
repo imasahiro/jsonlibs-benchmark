@@ -7,3 +7,6 @@
 [submodule "pficommon"]
 	path = pficommon
 	url = git://github.com/pfi/pficommon.git
+[submodule "rapidjson"]
+	path = rapidjson
+	url = https://github.com/miloyip/rapidjson.git
